@@ -1,0 +1,47 @@
+====================
+
+#21/01/2022 14:22:37	
+Nn = 5	 Nz = 100
+Ra = 100	 Pr = 1
+write = 30	 a = 1
+dt = 2.2956841138659323e-05
+iterations = 1e+05
+Sim ended early due to NaN t_amp. Ended on iteration 2437
+Temp -0.0671428	 Omega -0.0575402	 Psi -0.018253
+====================
+
+#21/01/2022 14:23:34	
+Nn = 5	 Nz = 100
+Ra = 500	 Pr = 1
+write = 30	 a = 1
+dt = 2.2956841138659323e-05
+iterations = 1e+05
+Sim ended early due to NaN t_amp. Ended on iteration 272
+Temp -0.263739	 Omega 4.66681	 Psi 4.84193
+====================
+
+#21/01/2022 14:23:55	
+Nn = 5	 Nz = 100
+Ra = 50	 Pr = 1
+write = 30	 a = 1
+dt = 2.2956841138659323e-05
+iterations = 1e+05
+Temp -0.000155495	 Omega -0.00240235	 Psi -0.00238783
+====================
+
+#24/01/2022 11:52:09	Ra=60
+Nn = 5	 Nz = 100
+Ra = 60	 Pr = 1
+write = 30	 a = 1
+dt = 0.000
+iterations = 1e+05
+Temp -0.000131148	 Omega -0.00240241	 Psi -0.00238464
+====================
+
+#24/01/2022 14:05:30	Ra=70
+Nn = 5	 Nz = 100
+Ra = 70	 Pr = 1
+write = 30	 a = 1
+dt = 0.000
+iterations = 1e+05
+Temp -3.67217e-12	 Omega -0.0566437	 Psi -0.0566437
