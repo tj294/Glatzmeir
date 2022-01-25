@@ -218,7 +218,7 @@ for iteration in range(0, int(nsteps+1)):
 
 	# Update temperature and vorticity using Adams-Bashford Time Integration
 	temp, omega = adams_bashford(temp, omega, temp_dt, omega_dt, dt, Nn, Nz)
-
+	
 	# Update velocity streamfunction by creating tridiagonal matrix and solving
 	psi = update_streamfunction(psi, sub, dia, sup, omega, Nn, Nz, c, oodz2)
 
@@ -260,8 +260,8 @@ for iteration in range(0, int(nsteps+1)):
 
 if(save_to_log):
 	with open(logfile, 'a') as log:
-		print("Temp {:.6}\t Omega {:.6}\t Psi {:.6}".format(temp_check, omega_check, psi_check), file=log)
+		print("Temp {:.6}\t Omega {:.6}\t Psi {:.6}".format(temp_check, omega_check, psi_check), file=log) # type: ignore
 
 end_t = time.time()
 t_delta = end_t - start_t
-print("Completed {} iterations in {:.2f} seconds.".format(iteration, t_delta))
+print("Completed {} iterations in {:.2f} seconds.".format(iteration, t_delta)) # type: ignore
