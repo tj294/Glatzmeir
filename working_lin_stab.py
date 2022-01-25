@@ -14,9 +14,10 @@ by Gary Glatzmaier.
 import argparse
 import numpy as np
 import math
-import matplotlib.pyplot as plt
 import time
 from datetime import datetime
+
+import matplotlib.pyplot as plt
 
 #Import my tridiagonal matrix solver from tridiagonal.py
 from tridiagonal import tridiagonal
@@ -93,6 +94,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-t', "--test", help='Do not save output to log', action="store_true")
 parser.add_argument('-c', '--comment', help='Optional comment to add to log', default='')
 parser.add_argument('-l', '--logfile', help='Name of logfile to write to. Default=log.txt', default='log.txt')
+parser.add_argument('-g', '--graphical', help='Plots the amplitude of n-modes against iteration number', action="store_true")
 args = parser.parse_args()
 
 if args.test:
@@ -100,6 +102,7 @@ if args.test:
 else:
 	save_to_log = True
 logfile = args.logfile
+graphical = args.graphical
 """
 ====================
 ===INITIALISATION===
@@ -212,18 +215,6 @@ for n in range(0, Nn):
 			temp[n][z] = np.sin(np.pi*z_vals[z])
 """
 ====================
-====GRAPH SET UP====
-====================
-"""
-fig = plt.figure(figsize=(6, 8))
-temp_ax = fig.add_subplot(311)
-omega_ax = fig.add_subplot(312)
-psi_ax = fig.add_subplot(313)
-temp_ax.set_title("Temperature Amplitudes")
-omega_ax.set_title("Vorticity Amplitudes")
-psi_ax.set_title("Streamfunction Amplitudes")
-"""
-====================
 ======SIM LOOP======
 ====================
 """
@@ -267,6 +258,10 @@ for iteration in range(0, int(nsteps+1)):
 				temp_check[n] = np.log(np.abs(t_amp[current][n])) - np.log(np.abs(t_amp[previous][n]))
 				omega_check[n] = np.log(np.abs(omega_amp[current][n])) - np.log(np.abs(omega_amp[previous][n]))
 				psi_check[n] = np.log(np.abs(psi_amp[current][n])) - np.log(np.abs(psi_amp[previous][n]))
+			temp_amps = np.vstack((temp_amps, temp_check))
+			omega_amps = np.vstack((omega_amps, omega_check))
+			psi_amps = np.vstack((psi_amps, psi_check))
+			# print(temp_amps)
 			print("{}\t| {:.6f}\t| {:.6f}\t| {:.6f}".format(iteration, temp_check[output_n], omega_check[output_n], psi_check[output_n]))
 
 		t_amp[previous] = t_amp[current]
@@ -286,4 +281,35 @@ if(save_to_log):
 end_t = time.time()
 t_delta = end_t - start_t
 print("Completed {} iterations in {:.2f} seconds.".format(iteration, t_delta)) # type: ignore
+
+if (graphical):
+	# fig = plt.figure(figsize=(6, 8))
+	# temp_ax = fig.add_subplot(311)
+	# omega_ax = fig.add_subplot(312)
+	# psi_ax = fig.add_subplot(313)
+	# temp_ax.set_title("Temperature Amplitudes")
+	# omega_ax.set_title("Vorticity Amplitudes")
+	# psi_ax.set_title("Streamfunction Amplitudes")
+
+	xdata = np.arange(0, nsteps+250, 250)
+	print(xdata)
+	print(temp_amps)
+	print(omega_amps)
+	print(psi_amps)
+	# print(temp_amps)
+	# temp_ax.plot(xdata, temp_amps)
+	# plt.show()
+	fig = plt.figure()
+	ax1 = fig.add_subplot(111)
+	ax1.set_title('n=1 mode')
+	ax1.plot(xdata, temp_amps[:,1], label='Temperature', color='r')
+	ax1.plot(xdata, omega_amps[:,1], label='Vorticity', color='b')
+	ax1.plot(xdata, psi_amps[:,1], label='Streamfunction', color='g', linestyle=':', linewidth=3)
+	ax1.legend()
+	plt.show()
+
+
+
+
+
 exit(0)
