@@ -14,7 +14,7 @@ by Gary Glatzmaier.
 import argparse
 import numpy as np
 import math
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import time
 from datetime import datetime
 
@@ -122,8 +122,8 @@ Ra = params.Ra # Rayleigh number (measures convective driving)
 Pr = params.Pr # Prandtl number (ratio of viscous to thermal diffusion)
 a = params.a # Aspect ratio of the box
 nsteps = params.nsteps # Total number of steps to run simulation for
-z_output = math.floor(params.z_percent*Nz) # 
-output_n = 0
+output_z = math.floor(params.z_percent*Nz) # 
+output_n = 1
 dz = 1.0/(Nz-1) # Spacing between adjacent z-levels
 oodz2 = 1./dz**2 #Constant for 1/dz^2 to avoid repeated recalculation
 c = np.pi / a # constant to avoid repeated calculation
@@ -154,6 +154,9 @@ for i in range(1, Nz+1):
 temp_check = np.zeros(shape=(Nn))
 omega_check = np.zeros(shape=(Nn))
 psi_check = np.zeros(shape=(Nn))
+temp_amps = np.zeros(shape=(Nn))
+omega_amps = np.zeros(shape=(Nn))
+psi_amps = np.zeros(shape=(Nn))
 """
 ====================
 =TRIDIAGONAL SET-UP=
@@ -189,10 +192,10 @@ if(save_to_log):
 	with open(logfile, 'a') as log:
 		log.write("====================\n\n")
 		log.write("#"+dt_string+"\t"+args.comment+"\n")
-		log.write("Nn = {}\t Nz = {}\n".format(Nn, Nz))
+		log.write("Nn = {}\t Nz = {}\t a = {}\n".format(Nn, Nz, a))
 		log.write("Ra = {}\t Pr = {}\n".format(Ra, Pr))
-		log.write("write = {}\t a = {}\n".format(z_output, a))
-		log.write("dt = {:.3f}\niterations = {:.0e}\n".format(dt, nsteps))
+		log.write("output z = {}\t output n = {}\n".format(output_z, output_n))
+		log.write("dt = {:.3e}\titerations = {:.0e}\n".format(dt, nsteps))
 
 """
 ====================
@@ -207,12 +210,31 @@ for n in range(0, Nn):
 	else: #for n>0, T_(n, z) = sin(pi*z) at t=0
 		for z in range(0, Nz):
 			temp[n][z] = np.sin(np.pi*z_vals[z])
-print(omega)
+"""
+====================
+====GRAPH SET UP====
+====================
+"""
+fig = plt.figure(figsize=(6, 8))
+temp_ax = fig.add_subplot(311)
+omega_ax = fig.add_subplot(312)
+psi_ax = fig.add_subplot(313)
+temp_ax.set_title("Temperature Amplitudes")
+omega_ax.set_title("Vorticity Amplitudes")
+psi_ax.set_title("Streamfunction Amplitudes")
 """
 ====================
 ======SIM LOOP======
 ====================
 """
+if output_n==0:
+	print("The output when n=0 is 0 for temperature amplitude and undefined for Vorticity and Psi")
+	print("Please input a value for output_n > 0")
+	exit(1)
+elif output_n > Nn:
+	print("Please input a value for output_n that is <= Nn.")
+	exit(2)
+
 print("I\t| temperature \t| vorticity\t| streamfunction")
 for iteration in range(0, int(nsteps+1)):
 	#print("Step No. {}, time: {}".format(iteration, t))
@@ -237,15 +259,14 @@ for iteration in range(0, int(nsteps+1)):
 		omega_amp[current] = 0
 		psi_amp[current] = 0
 		for n in range(Nn):
-			t_amp[current][n] = temp[n][z_output]
-			omega_amp[current][n] = omega[n][z_output]
-			psi_amp[current][n] = psi[n][z_output]
+			t_amp[current][n] = temp[n][output_z]
+			omega_amp[current][n] = omega[n][output_z]
+			psi_amp[current][n] = psi[n][output_z]
 		if iteration != 0:		
-			for n in range(0, Nn):
+			for n in range(1, Nn):	
 				temp_check[n] = np.log(np.abs(t_amp[current][n])) - np.log(np.abs(t_amp[previous][n]))
 				omega_check[n] = np.log(np.abs(omega_amp[current][n])) - np.log(np.abs(omega_amp[previous][n]))
 				psi_check[n] = np.log(np.abs(psi_amp[current][n])) - np.log(np.abs(psi_amp[previous][n]))
-	
 			print("{}\t| {:.6f}\t| {:.6f}\t| {:.6f}".format(iteration, temp_check[output_n], omega_check[output_n], psi_check[output_n]))
 
 		t_amp[previous] = t_amp[current]
@@ -265,3 +286,4 @@ if(save_to_log):
 end_t = time.time()
 t_delta = end_t - start_t
 print("Completed {} iterations in {:.2f} seconds.".format(iteration, t_delta)) # type: ignore
+exit(0)
