@@ -193,13 +193,16 @@ else: #if Prandtl > 1, divide 2.19 by Pr to avoid numerical instability
 
 #Add to log.txt the parameters of this simulation run.
 if(save_to_log):
-	with open(logfile, 'a') as log:
-		log.write("====================\n\n")
-		log.write("#"+dt_string+"\t"+args.comment+"\n")
-		log.write("Nn = {}\t Nz = {}\t a = {}\n".format(Nn, Nz, a))
-		log.write("Ra = {}\t Pr = {}\n".format(Ra, Pr))
-		log.write("output z = {}\t output n = {}\n".format(output_z, output_n))
-		log.write("dt = {:.3e}\titerations = {:.0e}\n".format(dt, nsteps))
+	print("Writing to log {}".format(logfile))
+	log = open(logfile, 'a')
+	log.write("====================\n\n")
+	log.write("#"+dt_string+"\t"+args.comment+"\n")
+	log.write("Nn = {}\t Nz = {}\t a = {}\n".format(Nn, Nz, a))
+	log.write("Ra = {}\t Pr = {}\n".format(Ra, Pr))
+	log.write("output z = {}\t output n = {}\n".format(output_z, output_n))
+	log.write("dt = {:.3e}\titerations = {:.0e}\n".format(dt, nsteps))
+	log.flush()
+	log.close()
 
 """
 ====================
@@ -276,8 +279,8 @@ for iteration in range(0, int(nsteps+1)):
 		break
 
 if(save_to_log):
-	with open(logfile, 'a') as log:
-		print("Temp {:.6}\t Omega {:.6}\t Psi {:.6}".format(temp_check, omega_check, psi_check), file=log)
+	log = open(logfile, 'a')
+	log.write("Temp {:.6}\t Omega {:.6}\t Psi {:.6}".format(temp_check[output_n], omega_check[output_n], psi_check[output_n]))
 
 end_t = time.time()
 t_delta = end_t - start_t
@@ -289,12 +292,16 @@ for n in range(1, Nn):
 	print("Vorticity check = {:.6f}".format(omega_amps[-1][n]))
 	print("Streamfunction check = {:.6f}".format(psi_amps[-1][n]))
 
-if (save_to_log):
-	for n in range(Nn):
-		print("\nFor n={} mode:".format(n), file=open(logfile, 'a'))
-		print("Temperature check = {:.6f}".format(temp_amps[-1][n]), file=open(logfile, 'a'))
-		print("Vorticity check = {:.6f}".format(omega_amps[-1][n]), file=open(logfile, 'a'))
-		print("Streamfunction check = {:.6f}".format(psi_amps[-1][n]), file=open(logfile, 'a'))	
+if(save_to_log):
+	print("saving")
+	log = open(logfile, 'a')
+	for n in range(1, Nn):
+		log.write("\nFor n={} mode:\n".format(n))
+		log.write("Temperature check = {:.6f}\n".format(temp_amps[-1][n]))
+		log.write("Vorticity check = {:.6f}\n".format(omega_amps[-1][n]))
+		log.write("Streamfunction check = {:.6f}\n".format(psi_amps[-1][n]))
+	log.flush()
+	log.close()	
 
 if (graphical):
 	xdata = np.arange(0, nsteps+250, 250)
@@ -317,8 +324,7 @@ if (graphical):
 		ax.annotate('{:.6f}'.format(omega_amps[-1][n+1]), (xdata[-1], omega_amps[-1][n+1]),
 			xytext=(xdata[-1], omega_amps[-1][n+1]+0.5), ha='right', color='b')
 		ax.annotate('{:.6f}'.format(psi_amps[-1][n+1]), (xdata[-1], psi_amps[-1][n+1]),
-			xytext=(xdata[-1], psi_amps[-1][n+1]+1), ha='right', color='g')
-		ax.set_xscale('symlog')
+			xytext=(xdata[-1], psi_amps[-1][n+1]+1), ha='right', color='g') 
 
 	fig.tight_layout()
 	if (args.savefig):
