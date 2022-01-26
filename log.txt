@@ -54,11 +54,3 @@ write = 30	 a = 1
 dt = 0.000
 iterations = 1e+05
 Temp -3.32173e-12	 Omega -0.0566437	 Psi -0.0566437
-
-====================
-
-#25/01/2022 14:57:48	
-Nn = 5	 Nz = 100	 a = 1
-Ra = 80	 Pr = 1
-output z = 30	 output n = 1
-dt = 2.296e-05	iterations = 1e+05
