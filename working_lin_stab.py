@@ -326,4 +326,8 @@ if (graphical):
 	else:
 		plt.show()
 
+
+
+
+
 exit(0)
