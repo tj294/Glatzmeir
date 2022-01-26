@@ -188,7 +188,7 @@ if(save_to_log):
 		log.write("Nn = {}\t Nz = {}\n".format(Nn, Nz))
 		log.write("Ra = {}\t Pr = {}\n".format(Ra, Pr))
 		log.write("write = {}\t a = {}\n".format(z_output, a))
-		log.write("dt = {:.3f}\niterations = {:.0e}\n".format(dt, nsteps))
+		log.write("dt = {:.3e}\niterations = {:e}\n".format(dt, nsteps))
 
 """
 ====================
@@ -218,7 +218,7 @@ for iteration in range(0, int(nsteps+1)):
 
 	# Update temperature and vorticity using Adams-Bashford Time Integration
 	temp, omega = adams_bashford(temp, omega, temp_dt, omega_dt, dt, Nn, Nz)
-	
+
 	# Update velocity streamfunction by creating tridiagonal matrix and solving
 	psi = update_streamfunction(psi, sub, dia, sup, omega, Nn, Nz, c, oodz2)
 

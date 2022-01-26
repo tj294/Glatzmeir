@@ -95,6 +95,7 @@ parser.add_argument('-t', "--test", help='Do not save output to log', action="st
 parser.add_argument('-c', '--comment', help='Optional comment to add to log', default='')
 parser.add_argument('-l', '--logfile', help='Name of logfile to write to. Default=log.txt', default='log.txt')
 parser.add_argument('-g', '--graphical', help='Plots the amplitude of n-modes against iteration number', action="store_true")
+parser.add_argument('-s', '--savefig', help='Will save the figure as out.png', action="store_true")
 args = parser.parse_args()
 
 if args.test:
@@ -282,31 +283,48 @@ end_t = time.time()
 t_delta = end_t - start_t
 print("Completed {} iterations in {:.2f} seconds.".format(iteration, t_delta)) # type: ignore
 
-if (graphical):
-	# fig = plt.figure(figsize=(6, 8))
-	# temp_ax = fig.add_subplot(311)
-	# omega_ax = fig.add_subplot(312)
-	# psi_ax = fig.add_subplot(313)
-	# temp_ax.set_title("Temperature Amplitudes")
-	# omega_ax.set_title("Vorticity Amplitudes")
-	# psi_ax.set_title("Streamfunction Amplitudes")
+for n in range(1, Nn):
+	print("\nFor n={} mode:".format(n))
+	print("Temperature check = {:.6f}".format(temp_amps[-1][n]))
+	print("Vorticity check = {:.6f}".format(omega_amps[-1][n]))
+	print("Streamfunction check = {:.6f}".format(psi_amps[-1][n]))
 
+if (save_to_log):
+	for n in range(Nn):
+		print("\nFor n={} mode:".format(n), file=open(logfile, 'a'))
+		print("Temperature check = {:.6f}".format(temp_amps[-1][n]), file=open(logfile, 'a'))
+		print("Vorticity check = {:.6f}".format(omega_amps[-1][n]), file=open(logfile, 'a'))
+		print("Streamfunction check = {:.6f}".format(psi_amps[-1][n]), file=open(logfile, 'a'))	
+
+if (graphical):
 	xdata = np.arange(0, nsteps+250, 250)
-	print(xdata)
-	print(temp_amps)
-	print(omega_amps)
-	print(psi_amps)
-	# print(temp_amps)
-	# temp_ax.plot(xdata, temp_amps)
-	# plt.show()
-	fig = plt.figure()
-	ax1 = fig.add_subplot(111)
-	ax1.set_title('n=1 mode')
-	ax1.plot(xdata, temp_amps[:,1], label='Temperature', color='r')
-	ax1.plot(xdata, omega_amps[:,1], label='Vorticity', color='b')
-	ax1.plot(xdata, psi_amps[:,1], label='Streamfunction', color='g', linestyle=':', linewidth=3)
-	ax1.legend()
-	plt.show()
+	ncols = 2
+	nrows = (Nn-1) // ncols + ((Nn-1) % ncols > 0)
+	fig, axs = plt.subplots(nrows, ncols, figsize=(9, 3*nrows), sharex=True)
+
+	for n, ax in enumerate(fig.axes):
+		if n>=Nn-1:
+			break
+		ax.set_title('n={} mode'.format(n+1))
+		ax.plot(xdata, temp_amps[:,n+1], label='Temperature', color='r')
+		ax.plot(xdata, omega_amps[:,n+1], label='Vorticity', color='b')
+		ax.plot(xdata, psi_amps[:,n+1], label='Streamfunction', color='g', linestyle=':', linewidth=3)
+		ax.legend()
+		ax.set_xlabel('Iteration')
+		ax.set_ylabel('Amplitude')
+		ax.annotate('{:.6f}'.format(temp_amps[-1][n+1]), (xdata[-1], temp_amps[-1][n+1]), 
+			xytext=(xdata[-1], temp_amps[-1][n+1]-0.5), ha='right', color='r')
+		ax.annotate('{:.6f}'.format(omega_amps[-1][n+1]), (xdata[-1], omega_amps[-1][n+1]),
+			xytext=(xdata[-1], omega_amps[-1][n+1]+0.5), ha='right', color='b')
+		ax.annotate('{:.6f}'.format(psi_amps[-1][n+1]), (xdata[-1], psi_amps[-1][n+1]),
+			xytext=(xdata[-1], psi_amps[-1][n+1]+1), ha='right', color='g')
+		ax.set_xscale('symlog')
+
+	fig.tight_layout()
+	if (args.savefig):
+		plt.savefig('out.png')
+	else:
+		plt.show()
 
 
 
