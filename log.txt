@@ -1,0 +1,94 @@
+====================
+
+#21/01/2022 14:22:37
+Nn = 5	 Nz = 100
+Ra = 100	 Pr = 1
+write = 30	 a = 1
+dt = 2.2956841138659323e-05
+iterations = 1e+05
+Sim ended early due to NaN t_amp. Ended on iteration 2437
+Temp -0.0671428	 Omega -0.0575402	 Psi -0.018253
+====================
+
+#21/01/2022 14:23:34
+Nn = 5	 Nz = 100
+Ra = 500	 Pr = 1
+write = 30	 a = 1
+dt = 2.2956841138659323e-05
+iterations = 1e+05
+Sim ended early due to NaN t_amp. Ended on iteration 272
+Temp -0.263739	 Omega 4.66681	 Psi 4.84193
+====================
+
+#21/01/2022 14:23:55
+Nn = 5	 Nz = 100
+Ra = 50	 Pr = 1
+write = 30	 a = 1
+dt = 2.2956841138659323e-05
+iterations = 1e+05
+Temp -0.000155495	 Omega -0.00240235	 Psi -0.00238783
+====================
+
+#24/01/2022 11:52:09	Ra=60
+Nn = 5	 Nz = 100
+Ra = 60	 Pr = 1
+write = 30	 a = 1
+dt = 0.000
+iterations = 1e+05
+Temp -0.000131148	 Omega -0.00240241	 Psi -0.00238464
+====================
+
+#24/01/2022 14:05:30	Ra=70
+Nn = 5	 Nz = 100
+Ra = 70	 Pr = 1
+write = 30	 a = 1
+dt = 0.000
+iterations = 1e+05
+Temp -3.67217e-12	 Omega -0.0566437	 Psi -0.0566437
+====================
+
+#24/01/2022 15:33:09	Ra=80
+Nn = 5	 Nz = 100
+Ra = 80	 Pr = 1
+write = 30	 a = 1
+dt = 0.000
+iterations = 1e+05
+Temp -3.32173e-12	 Omega -0.0566437	 Psi -0.0566437
+====================
+
+#26/01/2022 16:10:49	Ra=90
+Nn = 7	 Nz = 100	 a = 1
+Ra = 90	 Pr = 1
+output z = 30	 output n = 1
+dt = 2.296e-05	iterations = 5e+04
+Temp -0.0566445	 Omega -0.0566525	 Psi -0.0566525
+
+For n=1 mode:
+Temperature check = -0.056644
+Vorticity check = -0.056652
+Streamfunction check = -0.056652
+
+For n=2 mode:
+Temperature check = -0.226575
+Vorticity check = -0.226574
+Streamfunction check = -0.226574
+
+For n=3 mode:
+Temperature check = -0.509793
+Vorticity check = -0.509792
+Streamfunction check = -0.509792
+
+For n=4 mode:
+Temperature check = -0.906295
+Vorticity check = -0.906294
+Streamfunction check = -0.906294
+
+For n=5 mode:
+Temperature check = -1.416074
+Vorticity check = -1.416074
+Streamfunction check = -1.416074
+
+For n=6 mode:
+Temperature check = -2.039118
+Vorticity check = -2.039117
+Streamfunction check = -2.039117
