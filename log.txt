@@ -92,3 +92,162 @@ For n=6 mode:
 Temperature check = -2.039118
 Vorticity check = -2.039117
 Streamfunction check = -2.039117
+====================
+
+#03/02/2022 16:01:25	Ra=150
+Nn = 7	 Nz = 100	 a = 1
+Ra = 150	 Pr = 1
+output z = 30	 output n = 1
+dt = 2.296e-05	iterations = 5e+04
+Temp -0.0635787	 Omega -0.0635787	 Psi -0.0635787
+
+For n=1 mode:
+Temperature check = -0.063579
+Vorticity check = -0.063579
+Streamfunction check = -0.063579
+
+For n=2 mode:
+Temperature check = -0.003663
+Vorticity check = -0.006977
+Streamfunction check = -0.004504
+
+For n=3 mode:
+Temperature check = 0.000000
+Vorticity check = 0.000000
+Streamfunction check = 0.000000
+
+For n=4 mode:
+Temperature check = 0.000000
+Vorticity check = 0.000000
+Streamfunction check = 0.000000
+
+For n=5 mode:
+Temperature check = 0.000000
+Vorticity check = 0.000000
+Streamfunction check = 0.000000
+
+For n=6 mode:
+Temperature check = 0.000000
+Vorticity check = 0.000000
+Streamfunction check = 0.000000
+====================
+
+#03/02/2022 16:08:49	Ra=1000
+Nn = 7	 Nz = 100	 a = 1
+Ra = 10000.0	 Pr = 1
+output z = 30	 output n = 1
+dt = 2.296e-05	iterations = 5e+04
+Temp 0.292549	 Omega 0.292549	 Psi 0.292549
+
+For n=1 mode:
+Temperature check = 0.292549
+Vorticity check = 0.292549
+Streamfunction check = 0.292549
+
+For n=2 mode:
+Temperature check = 0.230121
+Vorticity check = 0.230121
+Streamfunction check = 0.230121
+
+For n=3 mode:
+Temperature check = -0.021961
+Vorticity check = -0.021961
+Streamfunction check = -0.021961
+
+For n=4 mode:
+Temperature check = 0.000000
+Vorticity check = 0.000000
+Streamfunction check = 0.000000
+
+For n=5 mode:
+Temperature check = 0.000000
+Vorticity check = 0.000000
+Streamfunction check = 0.000000
+
+For n=6 mode:
+Temperature check = 0.000000
+Vorticity check = 0.000000
+Streamfunction check = 0.000000
+====================
+
+#03/02/2022 16:17:18	Ra=500
+Nn = 7	 Nz = 100	 a = 1
+Ra = 500	 Pr = 1
+output z = 30	 output n = 1
+dt = 2.296e-05	iterations = 5e+04
+Temp -0.0225359	 Omega -0.0225359	 Psi -0.0225359
+
+For n=1 mode:
+Temperature check = -0.022536
+Vorticity check = -0.022536
+Streamfunction check = -0.022536
+
+For n=2 mode:
+Temperature check = -0.167896
+Vorticity check = -0.168031
+Streamfunction check = -0.167854
+
+For n=3 mode:
+Temperature check = 0.000000
+Vorticity check = 0.000000
+Streamfunction check = 0.000000
+
+For n=4 mode:
+Temperature check = 0.000000
+Vorticity check = 0.000000
+Streamfunction check = 0.000000
+
+For n=5 mode:
+Temperature check = 0.000000
+Vorticity check = 0.000000
+Streamfunction check = 0.000000
+
+For n=6 mode:
+Temperature check = 0.000000
+Vorticity check = 0.000000
+Streamfunction check = 0.000000
+====================
+
+#03/02/2022 16:23:58	Ra=750
+Nn = 7	 Nz = 100	 a = 1
+Ra = 750	 Pr = 1
+output z = 30	 output n = 1
+dt = 2.296e-05	iterations = 5e+04
+Temp -0.00214106	 Omega -0.00214106	 Psi -0.00214106
+
+For n=1 mode:
+Temperature check = -0.002141
+Vorticity check = -0.002141
+Streamfunction check = -0.002141
+
+For n=2 mode:
+Temperature check = -0.142628
+Vorticity check = -0.142628
+Streamfunction check = -0.142627
+
+For n=3 mode:
+Temperature check = 0.000000
+Vorticity check = 0.000000
+Streamfunction check = 0.000000
+
+For n=4 mode:
+Temperature check = 0.000000
+Vorticity check = 0.000000
+Streamfunction check = 0.000000
+
+For n=5 mode:
+Temperature check = 0.000000
+Vorticity check = 0.000000
+Streamfunction check = 0.000000
+
+For n=6 mode:
+Temperature check = 0.000000
+Vorticity check = 0.000000
+Streamfunction check = 0.000000
+====================
+
+#03/02/2022 16:35:04	Ra=900
+Nn = 7	 Nz = 100	 a = 1
+Ra = 900	 Pr = 1
+output z = 30	 output n = 1
+dt = 2.296e-05	iterations = 5e+04

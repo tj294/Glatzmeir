@@ -140,7 +140,9 @@ parser.add_argument(
     action="store_true",
 )
 parser.add_argument(
-    "-s", "--savefig", help="Will save the figure as out.png", action="store_true"
+    "-s", "--savefig",
+    help="Will save the figure with provided filename. Default=out.png",
+    nargs='?', default=False, const=True
 )
 args = parser.parse_args()
 
@@ -417,10 +419,11 @@ if graphical:
             ha="right",
             color="g",
         )
+        ax.axhline(ls='--', color='k')
 
     fig.tight_layout()
     if args.savefig:
-        plt.savefig("out.png")
+        plt.savefig(args.savefig)
     else:
         plt.show()
 
