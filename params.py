@@ -1,7 +1,7 @@
 Nn = 7  # Number of Fourier Modes (horizontal resolution)
 Nz = 100  # Vertical Resolution (Number of Z levels)
 
-Ra = 90  # Rayleigh number - measure of convective driving
+Ra = 150  # Rayleigh number - measure of convective driving
 Pr = 1  # Prandtl Number - viscous diffusion / thermal diffusion
 
 z_percent = 0.3  # Percentage of box height to print output from.

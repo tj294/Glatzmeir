@@ -5,6 +5,20 @@ Runs a linear stability analysis of 2D Rayleigh Benard convection.
 
 Code written consulting Introduction to Modeling Convection in Planets and Stars
 by Gary Glatzmaier.
+
+usage: lin_stab.py [-h] [-t] [-c COMMENT] [-l LOGFILE] [-g] [-s]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -t, --test            Do not save output to log
+  -c 'COMMENT', --comment 'COMMENT'
+                        Optional comment to add to log
+  -l 'LOGFILE', --logfile 'LOGFILE'
+                        Name of logfile to write to. Default=log.txt
+  -g, --graphical       Plots the amplitude of n-modes against iteration
+                        number
+  -s, --savefig         Will save the figure as out.png
+
 """
 """
 ===================
@@ -50,7 +64,7 @@ def finite_diff(temp_dt, omega_dt, psi, Nn, Nz, c, oodz2, temp, Ra, Pr, omega):
     for n in range(1, Nn):
         for z in range(1, Nz - 1):
             # Vertical Finite-Difference approximation for double-derivatives
-            temp_dt[current][n][z] = (n * c) * psi[n][z] * (
+            temp_dt[current][n][z] = (n * c) * psi[n][z] + (
                 oodz2 * (temp[n][z + 1] - 2 * temp[n][z] + temp[n][z - 1])
             ) - ((n * c) ** 2) * temp[n][z]
             omega_dt[current][n][z] = Ra * Pr * (n * c) * temp[n][z] + Pr * (
@@ -60,9 +74,9 @@ def finite_diff(temp_dt, omega_dt, psi, Nn, Nz, c, oodz2, temp, Ra, Pr, omega):
     return temp_dt, omega_dt
 
 
-def adams_bashford(temp, omega, temp_dt, omega_dt, dt, Nn, Nz):
+def adams_bashforth(temp, omega, temp_dt, omega_dt, dt, Nn, Nz):
     """
-	Uses the Adams-Bashford method to increase temperature and vorticity for each timestep.
+	Uses the Adams-Bashforth method to increase temperature and vorticity for each timestep.
 
 	Inputs:
 		temp - temperature array
@@ -77,7 +91,7 @@ def adams_bashford(temp, omega, temp_dt, omega_dt, dt, Nn, Nz):
 	"""
     for n in range(0, Nn):
         for z in range(0, Nz):
-            # Adams-Bashford Time Integration: T_t+dt = Tt + dt/2 * (3*dT/dt_t - dT/dt_t-dt)
+            # Adams-Bashforth Time Integration: T_t+dt = Tt + dt/2 * (3*dT/dt_t - dT/dt_t-dt)
             temp[n][z] = temp[n][z] + (dt / 2) * (
                 3 * temp_dt[current][n][z] - temp_dt[previous][n][z]
             )
@@ -88,6 +102,8 @@ def adams_bashford(temp, omega, temp_dt, omega_dt, dt, Nn, Nz):
 
 
 def update_streamfunction(psi, sub, dia, sup, omega, Nn, Nz, c, oodz2):
+
+    # First - construct the diagonal matrix
     for n in range(0, Nn):
         for z in range(0, Nz):
             if z == 0:
@@ -211,7 +227,6 @@ sup = []
 for i in range(1, Nz - 1):
     sub.append(-oodz2)
 sub.append(0)
-
 # Populate the superdiagonal array. First element=0, all others = -(1/dz^2)
 sup.append(0)
 for i in range(1, Nz - 1):
@@ -246,6 +261,8 @@ for n in range(0, Nn):
     else:  # for n>0, T_(n, z) = sin(pi*z) at t=0
         for z in range(0, Nz):
             temp[n][z] = np.sin(np.pi * z_vals[z])
+
+
 """
 ====================
 ======SIM LOOP======
@@ -271,9 +288,8 @@ for iteration in range(0, int(nsteps + 1)):
         temp_dt, omega_dt, psi, Nn, Nz, c, oodz2, temp, Ra, Pr, omega
     )
 
-    # Update temperature and vorticity using Adams-Bashford Time Integration
-    temp, omega = adams_bashford(temp, omega, temp_dt, omega_dt, dt, Nn, Nz)
-    # print(omega)
+    # Update temperature and vorticity using Adams-Bashforth Time Integration
+    temp, omega = adams_bashforth(temp, omega, temp_dt, omega_dt, dt, Nn, Nz)
     # Update velocity streamfunction by creating tridiagonal matrix and solving
     psi = update_streamfunction(psi, sub, dia, sup, omega, Nn, Nz, c, oodz2)
 
@@ -305,7 +321,6 @@ for iteration in range(0, int(nsteps + 1)):
             temp_amps = np.vstack((temp_amps, temp_check))
             omega_amps = np.vstack((omega_amps, omega_check))
             psi_amps = np.vstack((psi_amps, psi_check))
-            # print(temp_amps)
             print(
                 "{}\t| {:.6f}\t| {:.6f}\t| {:.6f}".format(
                     iteration,
@@ -319,7 +334,7 @@ for iteration in range(0, int(nsteps + 1)):
         omega_amp[previous] = omega_amp[current]
         psi_amp[previous] = psi_amp[current]
 
-    if np.isnan(np.any(temp)):
+    if np.any(np.isnan(temp)):
         print("Temp is NaN. Exiting on iteration {}.".format(iteration))
         if save_to_log:
             print(

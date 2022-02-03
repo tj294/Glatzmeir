@@ -10,19 +10,19 @@ presented in Glatzmaier
 import numpy as np
 
 def tridiagonal(sub, dia, sup, rhs):
-	'''Solves a tridiagonal matrix equation of rank Nz.
+	"""Solves a tridiagonal matrix equation of rank Nz.
 
 	Inputs:
-		sub - An array of length Nz containing the subdiagonal elements of the tridiagonal matrix
-		
+		sub - An array of length Nz-1 containing the subdiagonal elements of the tridiagonal matrix
+
 		dia - An array of length Nz containing the diagonal elements of the tridiagonal matrix
-		
-		sup - An array of length Nz containing the superdiagonal elements of the tridiagonal matrix
-		
+
+		sup - An array of length Nz-1 containing the superdiagonal elements of the tridiagonal matrix
+
 		rhs - An array of length Nz containing the RHS of the matrix equation
 	Outputs:
 		sol - The solution vector of length Nz
-'''
+"""
 
 	Nz = len(dia)
 	wk1 = np.zeros(Nz)
@@ -31,6 +31,7 @@ def tridiagonal(sub, dia, sup, rhs):
 	sub = np.append(1, sub)
 	sup = np.append(sup, 1)
 
+
 	wk1[0] = 1.0/dia[0]
 	wk2[0] = sup[0] * wk1[0]
 
@@ -38,10 +39,10 @@ def tridiagonal(sub, dia, sup, rhs):
 		wk1[i] = 1/(dia[i] - sub[i]*wk2[i-1])
 		wk2[i] = sup[i]*wk1[i]
 	wk1[Nz-1] = 1/(dia[Nz-1] - sub[Nz-1] * wk2[Nz-2])
-
+	# print(rhs[0])
 	sol[0] = rhs[0]*wk1[0]
 	for i in range(1, Nz):
-		sol[i] = (rhs[i] - sub[i]*sol[i-1])*wk1[i] 
+		sol[i] = (rhs[i] - sub[i]*sol[i-1])*wk1[i]
 	for i in range(Nz-2, -1, -1):
 		sol[i] = sol[i] - wk2[i] * sol[i+1]
 	return np.array(sol)
@@ -63,4 +64,3 @@ print(calc_sol)
 if np.all(np.isclose(rand_sol, np.array(calc_sol), rtol=0.001)):
 	print("Success")
 #"""
-
