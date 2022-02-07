@@ -6,6 +6,11 @@ Runs a linear stability analysis of 2D Rayleigh Benard convection.
 Code written consulting Introduction to Modeling Convection in Planets and Stars
 by Gary Glatzmaier.
 
+TO-DO:
+    1. Write to file at the end of simulation to allow multiple simulations
+        running at once.
+    2. Add ability to read in initial conditions from a previous run.
+
 usage: lin_stab.py [-h] [-t] [-c COMMENT] [-l LOGFILE] [-g] [-s]
 
 optional arguments:
@@ -64,7 +69,7 @@ def finite_diff(temp_dt, omega_dt, psi, Nn, Nz, c, oodz2, temp, Ra, Pr, omega):
     for n in range(1, Nn):
         for z in range(1, Nz - 1):
             # Vertical Finite-Difference approximation for double-derivatives
-            temp_dt[current][n][z] = (n * c) * psi[n][z] + (
+            temp_dt[current][n][z] = (
                 oodz2 * (temp[n][z + 1] - 2 * temp[n][z] + temp[n][z - 1])
             ) - ((n * c) ** 2) * temp[n][z]
             omega_dt[current][n][z] = Ra * Pr * (n * c) * temp[n][z] + Pr * (
@@ -143,6 +148,11 @@ parser.add_argument(
     "-s", "--savefig",
     help="Will save the figure with provided filename. Default=out.png",
     nargs='?', default=False, const=True
+)
+parser.add_argument(
+    "-i", "--initial",
+    help="Input a filename to read initial conditions from. Default, will start from 0",
+    nargs='?', default=False, const='inputs.py'
 )
 args = parser.parse_args()
 
@@ -255,14 +265,19 @@ if save_to_log:
 ===INITIAL VALUES===
 ====================
 """
-# Populate temperature array for initial temperatures (t=0)
-for n in range(0, Nn):
-    if n == 0:  # for n=0, T(z) = 1 - z for all z
-        for z in range(0, Nz): 
-            temp[0][z] = 1 - z_vals[z]
-    else:  # for n>0, T_(n, z) = sin(pi*z) at t=0
-        for z in range(0, Nz):
-            temp[n][z] = np.sin(np.pi * z_vals[z])
+if not (args.initial): #i.e. if starting from random initial conditions
+        # Populate temperature array for initial temperatures (t=0)
+        # Only need to initialise for n=0 and n=1
+        # when n=0:
+        # T(z) = 1 - z for all z
+        temp[0][z] = 1 - z_vals[z]
+        # for n=1:
+        # T_(n, z) = randbetween(-1, 1) * small constant * sin(pi*z) at t=0
+        # Initial non-zero values represent small temp perturbations
+        temp[1][z] = np.random.randint(-10, 10)/10 * 0.001 * \
+            np.sin(np.pi * z_vals[z])
+else: #Read in initial conditions from a previous run. NOT YET IMPLEMENTED
+    print("Will read initial conditions from {}".format(args.initial))
 
 
 """
