@@ -20,11 +20,11 @@ optional arguments:
   -s, --savefig         Will save the figure as out.png
 
 """
-"""
-===================
-======IMPORTS======
-===================
-"""
+
+# ===================
+# ======IMPORTS======
+# ===================
+
 import argparse
 import numpy as np
 import math
@@ -64,9 +64,11 @@ def finite_diff(temp_dt, omega_dt, psi, Nn, Nz, c, oodz2, temp, Ra, Pr, omega):
     for n in range(1, Nn):
         for z in range(1, Nz - 1):
             # Vertical Finite-Difference approximation for double-derivatives
-            temp_dt[current][n][z] = (n * c) * psi[n][z] + (
-                oodz2 * (temp[n][z + 1] - 2 * temp[n][z] + temp[n][z - 1])
-            ) - ((n * c) ** 2) * temp[n][z]
+            temp_dt[current][n][z] = (
+                (n * c) * psi[n][z]
+                + (oodz2 * (temp[n][z + 1] - 2 * temp[n][z] + temp[n][z - 1]))
+                - ((n * c) ** 2) * temp[n][z]
+            )
             omega_dt[current][n][z] = Ra * Pr * (n * c) * temp[n][z] + Pr * (
                 oodz2 * (omega[n][z + 1] - 2 * omega[n][z] + omega[n][z - 1])
                 - (n * c) ** 2 * omega[n][z]
@@ -115,11 +117,10 @@ def update_streamfunction(psi, sub, dia, sup, omega, Nn, Nz, c, oodz2):
     return psi
 
 
-"""
-=====================
-=====CLA PARSING=====
-=====================
-"""
+# =====================
+# =====CLA PARSING=====
+# =====================
+
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "-t", "--test", help="Do not save output to log", action="store_true"
@@ -140,9 +141,12 @@ parser.add_argument(
     action="store_true",
 )
 parser.add_argument(
-    "-s", "--savefig",
+    "-s",
+    "--savefig",
     help="Will save the figure with provided filename. Default=out.png",
-    nargs='?', default=False, const=True
+    nargs="?",
+    default=False,
+    const=True,
 )
 args = parser.parse_args()
 
@@ -152,11 +156,10 @@ else:
     save_to_log = True
 logfile = args.logfile
 graphical = args.graphical
-"""
-====================
-===INITIALISATION===
-====================
-"""
+
+# ====================
+# ===INITIALISATION===
+# ====================
 
 run_begin = datetime.now()
 dt_string = run_begin.strftime("%d/%m/%Y %H:%M:%S")
@@ -211,11 +214,11 @@ psi_check = np.zeros(shape=(Nn))
 temp_amps = np.zeros(shape=(Nn))
 omega_amps = np.zeros(shape=(Nn))
 psi_amps = np.zeros(shape=(Nn))
-"""
-====================
-=TRIDIAGONAL SET-UP=
-====================
-"""
+
+# ====================
+# =TRIDIAGONAL SET-UP=
+# ====================
+
 # Matrix defined by Eq 2.21 in Glatzmaier
 # Arrays to hold the values of the tridiagonal matrix.
 sub = []
@@ -250,11 +253,11 @@ if save_to_log:
         log.write("output z = {}\t output n = {}\n".format(output_z, output_n))
         log.write("dt = {:.3e}\titerations = {:.0e}\n".format(dt, nsteps))
 
-"""
-====================
-===INITIAL VALUES===
-====================
-"""
+
+# ====================
+# ===INITIAL VALUES===
+# ====================
+
 # Populate temperature array for initial temperatures (t=0)
 for n in range(0, Nn):
     if n == 0:  # for n=0, T(z) = 1 - z for all z
@@ -265,11 +268,10 @@ for n in range(0, Nn):
             temp[n][z] = np.sin(np.pi * z_vals[z])
 
 
-"""
-====================
-======SIM LOOP======
-====================
-"""
+# ====================
+# ======SIM LOOP======
+# ====================
+
 if output_n == 0:
     print(
         "The output when n=0 is 0 for temperature amplitude is undefined for "
@@ -419,7 +421,7 @@ if graphical:
             ha="right",
             color="g",
         )
-        ax.axhline(ls='--', color='k')
+        ax.axhline(ls="--", color="k")
 
     fig.tight_layout()
     if args.savefig:
