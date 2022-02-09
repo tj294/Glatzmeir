@@ -1,5 +1,5 @@
 Nn = 10  # Number of Fourier Modes (horizontal resolution)
-Nz = 1000  # Vertical Resolution (Number of Z levels)
+Nz = 100  # Vertical Resolution (Number of Z levels)
 
 Ra = 675  # Rayleigh number - measure of convective driving
 Pr = 0.3  # Prandtl Number - viscous diffusion / thermal diffusion

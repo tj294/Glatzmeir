@@ -1,35 +1,33 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Runs a linear stability analysis of 2D Rayleigh Benard convection.
-
-Code written consulting Introduction to Modeling Convection in Planets and Stars
-by Gary Glatzmaier.
-
-TO-DO:
-    1. Write to file at the end of simulation to allow multiple simulations
-        running at once.
-    2. Add ability to read in initial conditions from a previous run.
-
-usage: lin_stab.py [-h] [-t] [-c COMMENT] [-l LOGFILE] [-g] [-s]
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -t, --test            Do not save output to log
-  -c 'COMMENT', --comment 'COMMENT'
-                        Optional comment to add to log
-  -l 'LOGFILE', --logfile 'LOGFILE'
-                        Name of logfile to write to. Default=log.txt
-  -g, --graphical       Plots the amplitude of n-modes against iteration
-                        number
-  -s, --savefig         Will save the figure as out.png
-
+# Runs a linear stability analysis of 2D Rayleigh Benard convection.
+#
+# Code written consulting Introduction to Modeling Convection in Planets and Stars
+# by Gary Glatzmaier.
+#
+# TO-DO:
+#     1. Write to file at the end of simulation to allow multiple simulations
+#         running at once.
+#     2. Add ability to read in initial conditions from a previous run.
+#
+# usage: lin_stab.py [-h] [-t] [-c COMMENT] [-l LOGFILE] [-g] [-s]
+#
+# optional arguments:
+#   -h, --help            show this help message and exit
+#   -t, --test            Do not save output to log
+#   -c 'COMMENT', --comment 'COMMENT'
+#                         Optional comment to add to log
+#   -l 'LOGFILE', --logfile 'LOGFILE'
+#                         Name of logfile to write to. Default=log.txt
+#   -g, --graphical       Plots the amplitude of n-modes against iteration
+#                         number
+#   -s, --savefig         Will save the figure as out.png
 """
-"""
-===================
-======IMPORTS======
-===================
-"""
+#
+# ===================
+# ======IMPORTS======
+# ===================
 import argparse
 import numpy as np
 import math
@@ -45,7 +43,9 @@ from tridiagonal import tridiagonal
 import params
 
 
-def finite_diff(temp_dt, omega_dt, psi, Nn, Nz, c, oodz2, temp, Ra, Pr, omega):
+def update_derivatives(
+    temp_dt, omega_dt, psi, Nn, Nz, c, oodz2, oo2dz, temp, Ra, Pr, omega
+):
     """
 	Updates the time-derivatives of temp_dt and omega_dt using the Vertical Finite-Difference method to approximate spatial double derivates
 
@@ -66,9 +66,13 @@ def finite_diff(temp_dt, omega_dt, psi, Nn, Nz, c, oodz2, temp, Ra, Pr, omega):
 		omega_dt - as above but with new values for "current step"
 	"""
     current = 1
-    for n in range(1, Nn):
-        for z in range(1, Nz - 1):
-            # Vertical Finite-Difference approximation for double-derivatives
+    for z in range(1, Nz - 1):
+        # For all linear terms:
+        # n = 0
+        temp_dt[current][0][z] = oodz2 * (
+            temp[0][z + 1] - 2 * temp[0][z] + temp[0][z - 1]
+        )
+        for n in range(1, Nn):  # 1 <= n <= Nn
             temp_dt[current][n][z] = (
                 oodz2 * (temp[n][z + 1] - 2 * temp[n][z] + temp[n][z - 1])
             ) - ((n * c) ** 2) * temp[n][z]
@@ -76,6 +80,121 @@ def finite_diff(temp_dt, omega_dt, psi, Nn, Nz, c, oodz2, temp, Ra, Pr, omega):
                 oodz2 * (omega[n][z + 1] - 2 * omega[n][z] + omega[n][z - 1])
                 - (n * c) ** 2 * omega[n][z]
             )
+        # for all non-linear terms:
+        # n = 0
+        for n_p in range(1, Nn):
+            temp_dt[current][0][z] += (
+                -(n_p * c / 2)
+                * oo2dz
+                * (
+                    temp[n_p][z] * (psi[n_p][z + 1] - psi[n_p][z - 1])
+                    + psi[n_p][z] * (temp[n_p][z + 1] - temp[n_p][z - 1])
+                )
+            )
+        # n from 1 to Nn
+        for n in range(1, Nn):
+            # n' = 0:
+            temp_dt[current][n][z] += (
+                -(n * c * oo2dz) * psi[n][z] * (temp[0][z + 1] - temp[0][z - 1])
+            )
+            for n_p in range(1, Nn):
+                # Kronecker-Delta contributions from temp_dt and omega_dt
+                n_pp = n - n_p
+                if (n_pp >= 1) and (n_pp <= Nn - 1):
+                    temp_dt[current][n][z] += (-0.5 * c) * (
+                        (
+                            -n_p
+                            * oo2dz
+                            * (psi[n_pp][z + 1] - psi[n_pp][z - 1])
+                            * temp[n_p][z]
+                        )
+                        + (
+                            n_pp
+                            * oo2dz
+                            * (temp[n_p][z + 1] - temp[n_p][z - 1])
+                            * psi[n_pp][z]
+                        )
+                    )
+
+                    omega_dt[current][n][z] += (-0.5 * c) * (
+                        (
+                            -n_p
+                            * oo2dz
+                            * (psi[n_pp][z + 1] - psi[n_pp][z - 1])
+                            * omega[n_pp][z]
+                        )
+                        + (
+                            n_pp
+                            * oo2dz
+                            * (omega[n_p][z + 1] - omega[n_p][z - 1])
+                            * psi[n_pp][z]
+                        )
+                    )
+                n_pp = n + n_p  # When n'' = n + n'. then delta_n''-n, n = 1
+                if (n_pp >= 1) and (n_pp <= Nn - 1):
+                    temp_dt[current][n][z] += (-0.5 * c) * (
+                        (
+                            n_p
+                            * oo2dz
+                            * (psi[n_pp][z + 1] - psi[n_pp][z - 1])
+                            * temp[n_p][z]
+                        )
+                        + (
+                            n_pp
+                            * oo2dz
+                            * (temp[n_p][z + 1] - temp[n_p][z - 1])
+                            * psi[n_pp][z]
+                        )
+                    )
+                    omega_dt[current][n][z] += (
+                        (-0.5 * c)
+                        * -1
+                        * (
+                            (
+                                n_p
+                                * oo2dz
+                                * (psi[n_pp][z + 1] - psi[n_pp][z - 1])
+                                * omega[n_p][z]
+                            )
+                            + (
+                                n_pp
+                                * psi[n_pp][z]
+                                * oo2dz
+                                * (omega[n_p][z + 1] - omega[n_p][z - 1])
+                            )
+                        )
+                    )
+                n_pp = n_p - n
+                if (n_pp >= 1) and (n_pp <= Nn - 1):
+                    temp_dt[current][n][z] += (-0.5 * c) * (
+                        (
+                            n_p
+                            * oo2dz
+                            * (psi[n_pp][z + 1] - psi[n_pp][z - 1])
+                            * temp[n_p][z]
+                        )
+                        + (
+                            n_pp
+                            * oo2dz
+                            * (temp[n_p][z + 1] - temp[n_p][z - 1])
+                            * psi[n_pp][z]
+                        )
+                    )
+                    omega_dt[current][n][z] += (-0.5 * c) * (
+                        (
+                            n_p
+                            * oo2dz
+                            * (psi[n_pp][z + 1] - psi[n_pp][z - 1])
+                            * omega[n_p][z]
+                        )
+                        + (
+                            n_pp
+                            * oo2dz
+                            * (omega[n_p][z + 1] - omega[n_p][z - 1])
+                            * psi[n_pp][z]
+                        )
+                    )
+
     return temp_dt, omega_dt
 
 
@@ -120,11 +239,9 @@ def update_streamfunction(psi, sub, dia, sup, omega, Nn, Nz, c, oodz2):
     return psi
 
 
-"""
-=====================
-=====CLA PARSING=====
-=====================
-"""
+# =====================
+# =====CLA PARSING=====
+# =====================
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "-t", "--test", help="Do not save output to log", action="store_true"
@@ -145,14 +262,20 @@ parser.add_argument(
     action="store_true",
 )
 parser.add_argument(
-    "-s", "--savefig",
+    "-s",
+    "--savefig",
     help="Will save the figure with provided filename. Default=out.png",
-    nargs='?', default=False, const=True
+    nargs="?",
+    default=False,
+    const=True,
 )
 parser.add_argument(
-    "-i", "--initial",
+    "-i",
+    "--initial",
     help="Input a filename to read initial conditions from. Default, will start from 0",
-    nargs='?', default=False, const='inputs.py'
+    nargs="?",
+    default=False,
+    const="inputs.py",
 )
 args = parser.parse_args()
 
@@ -162,12 +285,10 @@ else:
     save_to_log = True
 logfile = args.logfile
 graphical = args.graphical
-"""
-====================
-===INITIALISATION===
-====================
-"""
 
+# ====================
+# ===INITIALISATION===
+# ====================
 run_begin = datetime.now()
 dt_string = run_begin.strftime("%d/%m/%Y %H:%M:%S")
 # Begin timing
@@ -188,6 +309,7 @@ output_z = math.floor(params.z_percent * Nz)  #
 output_n = 1
 dz = 1.0 / (Nz - 1)  # Spacing between adjacent z-levels
 oodz2 = 1.0 / dz ** 2  # Constant for 1/dz^2 to avoid repeated recalculation
+oo2dz = 1.0 / (2 * dz)
 c = np.pi / a  # constant to avoid repeated calculation
 
 # Initialise arrays for the problem variables.
@@ -221,11 +343,11 @@ psi_check = np.zeros(shape=(Nn))
 temp_amps = np.zeros(shape=(Nn))
 omega_amps = np.zeros(shape=(Nn))
 psi_amps = np.zeros(shape=(Nn))
-"""
-====================
-=TRIDIAGONAL SET-UP=
-====================
-"""
+
+# ====================
+# =TRIDIAGONAL SET-UP=
+# ====================
+
 # Matrix defined by Eq 2.21 in Glatzmaier
 # Arrays to hold the values of the tridiagonal matrix.
 sub = []
@@ -260,31 +382,32 @@ if save_to_log:
         log.write("output z = {}\t output n = {}\n".format(output_z, output_n))
         log.write("dt = {:.3e}\titerations = {:.0e}\n".format(dt, nsteps))
 
-"""
-====================
-===INITIAL VALUES===
-====================
-"""
-if not (args.initial): #i.e. if starting from random initial conditions
-        # Populate temperature array for initial temperatures (t=0)
-        # Only need to initialise for n=0 and n=1
+# ====================
+# ===INITIAL VALUES===
+# ====================
+
+
+if not (args.initial):
+    # i.e. if starting from random initial conditions
+    # Populate temperature array for initial temperatures (t=0)
+    # Only need to initialise for n=0 and n=1
+    for z in range(0, Nn):
         # when n=0:
         # T(z) = 1 - z for all z
         temp[0][z] = 1 - z_vals[z]
         # for n=1:
         # T_(n, z) = randbetween(-1, 1) * small constant * sin(pi*z) at t=0
         # Initial non-zero values represent small temp perturbations
-        temp[1][z] = np.random.randint(-10, 10)/10 * 0.001 * \
-            np.sin(np.pi * z_vals[z])
-else: #Read in initial conditions from a previous run. NOT YET IMPLEMENTED
+        temp[1][z] = np.random.randint(-10, 10) / 10 * 0.001 * np.sin(np.pi * z_vals[z])
+else:
+    # Read in initial conditions from a previous run. NOT YET IMPLEMENTED
     print("Will read initial conditions from {}".format(args.initial))
 
 
-"""
-====================
-======SIM LOOP======
-====================
-"""
+# ====================
+# ======SIM LOOP======
+# ====================
+
 if output_n == 0:
     print(
         "The output when n=0 is 0 for temperature amplitude is undefined for "
@@ -298,13 +421,13 @@ elif output_n > Nn:
 
 print("I\t| temperature \t| vorticity\t| streamfunction")
 for iteration in range(0, int(nsteps + 1)):
-    # print("Step No. {}, time: {}".format(iteration, t))
+    # print("Step No. {}".format(iteration))
+
     # Update derivatives of temperature and vorticity for the current timestep
-
-    temp_dt, omega_dt = finite_diff(
-        temp_dt, omega_dt, psi, Nn, Nz, c, oodz2, temp, Ra, Pr, omega
+    temp_dt, omega_dt = update_derivatives(
+        temp_dt, omega_dt, psi, Nn, Nz, c, oodz2, oo2dz, temp, Ra, Pr, omega
     )
-
+    # print(list(temp_dt))
     # Update temperature and vorticity using Adams-Bashforth Time Integration
     temp, omega = adams_bashforth(temp, omega, temp_dt, omega_dt, dt, Nn, Nz)
     # Update velocity streamfunction by creating tridiagonal matrix and solving
@@ -316,7 +439,7 @@ for iteration in range(0, int(nsteps + 1)):
             omega_dt[previous][n][z] = omega_dt[current][n][z]
 
     # ANALYSIS OUTPUT
-    if iteration % 250 == 0:
+    if iteration % 50 == 0:
         t_amp[current] = 0
         omega_amp[current] = 0
         psi_amp[current] = 0
@@ -434,7 +557,7 @@ if graphical:
             ha="right",
             color="g",
         )
-        ax.axhline(ls='--', color='k')
+        ax.axhline(ls="--", color="k")
 
     fig.tight_layout()
     if args.savefig:
