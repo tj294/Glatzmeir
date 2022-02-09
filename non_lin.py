@@ -222,6 +222,7 @@ def adams_bashforth(temp, omega, temp_dt, omega_dt, dt, Nn, Nz):
             omega[n][z] = omega[n][z] + (dt / 2) * (
                 3 * omega_dt[current][n][z] - omega_dt[previous][n][z]
             )
+        # print("for n={}:\ntemp={}\nomega={}".format(n, temp[n], omega[n]))
     return temp, omega
 
 
@@ -236,6 +237,7 @@ def update_streamfunction(psi, sub, dia, sup, omega, Nn, Nz, c, oodz2):
                 dia[z] = (n * c) ** 2 + 2 * oodz2
         dia[-1] = 1
         psi[n] = tridiagonal(sub, dia, sup, omega[n])
+        # print("for n={}:\npsi={}".format(n, psi[n]))
     return psi
 
 
@@ -304,20 +306,24 @@ Nn = params.Nn  # Number of Fourier modes
 Ra = params.Ra  # Rayleigh number (measures convective driving)
 Pr = params.Pr  # Prandtl number (ratio of viscous to thermal diffusion)
 a = params.a  # Aspect ratio of the box
-nsteps = params.nsteps  # Total number of steps to run simulation for
-output_z = math.floor(params.z_percent * Nz)  #
-output_n = 1
 dz = 1.0 / (Nz - 1)  # Spacing between adjacent z-levels
 oodz2 = 1.0 / dz ** 2  # Constant for 1/dz^2 to avoid repeated recalculation
 oo2dz = 1.0 / (2 * dz)
 c = np.pi / a  # constant to avoid repeated calculation
 
+# Iteration Parameters
+nsteps = params.nsteps  # Total number of steps to run simulation for
+output_z = math.floor(params.z_percent * Nz)  #
+output_n = 0
+iprint = 50
+
 # Initialise arrays for the problem variables.
-psi = np.zeros(
-    shape=(Nn, Nz)
-)  # Velocity Streamfunction, psi[n][z] = nth mode of the zth level
-omega = np.zeros(shape=(Nn, Nz))  # Vorticity, omega[n][z] = nth mode of the zth level
-temp = np.zeros(shape=(Nn, Nz))  # Temperature, temp[n][z] = nth mode of the zth level
+# Velocity Streamfunction, psi[n][z] = nth mode of the zth level
+psi = np.zeros(shape=(Nn, Nz))
+# Vorticity, omega[n][z] = nth mode of the zth level
+omega = np.zeros(shape=(Nn, Nz))
+# Temperature, temp[n][z] = nth mode of the zth level
+temp = np.zeros(shape=(Nn, Nz))
 
 # Initialise arrays for the time derivatives of temperature and vorticity.
 # arrays called as: var_dt[step][n][z]
@@ -414,14 +420,14 @@ if output_n == 0:
         + "\nVorticity and Psi"
     )
     print("Please input a value for output_n > 0")
-    exit(1)
+    # exit(1)
 elif output_n > Nn:
     print("Please input a value for output_n that is <= Nn.")
     exit(2)
-
+print("for n={}".format(output_n))
 print("I\t| temperature \t| vorticity\t| streamfunction")
 for iteration in range(0, int(nsteps + 1)):
-    # print("Step No. {}".format(iteration))
+    print("{}".format(iteration), end="\r")
 
     # Update derivatives of temperature and vorticity for the current timestep
     temp_dt, omega_dt = update_derivatives(
@@ -437,18 +443,24 @@ for iteration in range(0, int(nsteps + 1)):
         for z in range(0, Nz):
             temp_dt[previous][n][z] = temp_dt[current][n][z]
             omega_dt[previous][n][z] = omega_dt[current][n][z]
+    if iteration == 49:
+        for n in range(Nn):
+            t_amp[previous][n] = temp[n][output_z]
+            omega_amp[previous][n] = omega[n][output_z]
+            psi_amp[previous][n] = psi[n][output_z]
+            print("{}, {}".format(n, omega[previous][n]))
 
     # ANALYSIS OUTPUT
-    if iteration % 50 == 0:
+    if iteration % iprint == 0:
         t_amp[current] = 0
         omega_amp[current] = 0
         psi_amp[current] = 0
-        for n in range(Nn):
+        for n in range(0, Nn):
             t_amp[current][n] = temp[n][output_z]
             omega_amp[current][n] = omega[n][output_z]
             psi_amp[current][n] = psi[n][output_z]
         if iteration != 0:
-            for n in range(1, Nn):
+            for n in range(0, Nn):
                 temp_check[n] = np.log(np.abs(t_amp[current][n])) - np.log(
                     np.abs(t_amp[previous][n])
                 )
