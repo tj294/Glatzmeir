@@ -443,14 +443,15 @@ for iteration in range(0, int(nsteps + 1)):
         for z in range(0, Nz):
             temp_dt[previous][n][z] = temp_dt[current][n][z]
             omega_dt[previous][n][z] = omega_dt[current][n][z]
-    if iteration == 49:
+
+    # ANALYSIS OUTPUT
+    if iteration == 1:
         for n in range(Nn):
             t_amp[previous][n] = temp[n][output_z]
             omega_amp[previous][n] = omega[n][output_z]
             psi_amp[previous][n] = psi[n][output_z]
-            print("{}, {}".format(n, omega[previous][n]))
+            # print("{}, {}".format(n, omega[previous][n]))
 
-    # ANALYSIS OUTPUT
     if iteration % iprint == 0:
         t_amp[current] = 0
         omega_amp[current] = 0
