@@ -501,7 +501,8 @@ if not (args.initial):
         # for n=1:
         # T_(n, z) = randbetween(-1, 1) * small constant * sin(pi*z) at t=0
         # Initial non-zero values represent small temp perturbations
-        temp[1][z] = np.random.randint(-10, 10) / 10 * 0.001 * np.sin(np.pi * z_vals[z])
+        temp[1][z] = 0.01 * np.sin(np.pi * z_vals[z])
+    temp[1][Nz - 1] = 0  # to avoid the floating point rounding error for sin(pi)!=0
     curr_time = 0
     iter_start = 0
 else:
